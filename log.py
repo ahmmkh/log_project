@@ -8,7 +8,8 @@ QUERY_1 = ("SELECT "
            "COUNT(log.path) "
            "FROM "
            "log "
-           "INNER JOIN articles ON CONCAT('/article/', articles.slug) = log.path "
+           "INNER JOIN articles ON CONCAT('/article/', articles.slug)"
+           " = log.path "
            "GROUP BY "
            "articles.title "
            "ORDER BY "
@@ -20,7 +21,8 @@ QUERY_2 = ("SELECT "
            "COUNT(log.path) "
            "FROM "
            "log "
-           "INNER JOIN articles ON CONCAT('/article/', articles.slug) = log.path "
+           "INNER JOIN articles ON CONCAT('/article/', articles.slug)"
+           " = log.path "
            "INNER JOIN authors ON articles.author = authors.id "
            "GROUP BY "
            "authors.name "
@@ -28,7 +30,8 @@ QUERY_2 = ("SELECT "
            "COUNT(log.path) DESC")
 QUERY_3 = ("SELECT "
            "normal.day, "
-           "ROUND(((err.errors + 0.0) / (normal.pass_code+0.0))*100 , 2) as perc "
+           "ROUND(((err.errors + 0.0) / (normal.pass_code+0.0))*100 , 2) as"
+           " perc "
            "FROM "
            "( "
            "SELECT "
@@ -61,12 +64,12 @@ QUERY_3 = ("SELECT "
 
 
 def connect():
-    """ Cnnect To the database  """
+    """ Connect To the database  """
     try:
         db = psycopg2.connect("dbname=news")
         cur = db.cursor()
         return db, cur
-    except:
+    except ValueError:
         print("there is an error while connecting")
 
 
@@ -90,4 +93,4 @@ if __name__ == '__main__':
     queries = [QUERY_1, QUERY_2, QUERY_3]
     with open("report.txt", "w+") as f:
         for i in xrange(len(queries)):
-            print_data(get_query(queries[i]), i,f)
+            print_data(get_query(queries[i]), i, f)
