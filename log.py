@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import psycopg2
 postfix = ["views", "views", "%"]
 postfix_msg = ["the most popular three articles of all time",
@@ -28,39 +29,36 @@ QUERY_2 = ("SELECT "
            "authors.name "
            "ORDER BY "
            "COUNT(log.path) DESC")
-QUERY_3 = ("SELECT "
-           "normal.day, "
-           "ROUND(((err.errors + 0.0) / (normal.pass_code+0.0))*100 , 2) as"
-           " perc "
-           "FROM "
-           "( "
-           "SELECT "
-           "DATE(time) as day, "
-           "COUNT(DATE(time)) as errors "
-           "FROM "
-           "log "
-           "WHERE "
-           "status = '404 NOT FOUND' "
-           "GROUP BY "
-           "DATE(time) "
-           "ORDER BY "
-           "DATE(time) DESC "
-           ") err "
-           "INNER JOIN ( "
-           "SELECT "
-           "DATE(time) as day, "
-           "COUNT(DATE(time)) as pass_code "
-           "FROM "
-           "log "
-           "WHERE "
-           "status = '200 OK' "
-           "GROUP BY "
-           " DATE(time) "
-           "ORDER BY "
-           "DATE(time) DESC "
-           ") normal ON err.day = normal.day "
-           "WHERE "
-           "ROUND(((err.errors + 0.0) / (normal.pass_code+0.0))*100 , 2) > 1")
+QUERY_3 = ("""SELECT
+            normal.day,
+            ROUND(((err.errors + 0.0)/(normal.pass_code+0.0))*100, 2) as perc
+        FROM
+            (
+                SELECT
+                    to_char(DATE(time),'FMMonth dd, YYYY') as day,
+                    COUNT(to_char(DATE(time),'FMMonth dd, YYYY')) as errors
+                FROM
+                    log
+                WHERE
+                    status = '404 NOT FOUND'
+                GROUP BY
+                    to_char(DATE(time),'FMMonth dd, YYYY')
+                ORDER BY
+                    to_char(DATE(time),'FMMonth dd, YYYY') DESC
+            ) err
+            INNER JOIN (
+                SELECT
+                    to_char(DATE(time),'FMMonth dd, YYYY') as day,
+                    COUNT(to_char(DATE(time),'FMMonth dd, YYYY')) as pass_code
+                FROM
+                    log
+                GROUP BY
+                    to_char(DATE(time),'FMMonth dd, YYYY')
+                ORDER BY
+                    to_char(DATE(time),'FMMonth dd, YYYY') DESC
+            ) normal ON err.day = normal.day
+        WHERE
+            ROUND(((err.errors + 0.0)/(normal.pass_code+0.0))*100, 2)>1;""")
 
 
 def connect():
@@ -69,8 +67,8 @@ def connect():
         db = psycopg2.connect("dbname=news")
         cur = db.cursor()
         return db, cur
-    except ValueError:
-        print("there is an error while connecting")
+    except Exception as e:
+        print e
 
 
 def get_query(query):
